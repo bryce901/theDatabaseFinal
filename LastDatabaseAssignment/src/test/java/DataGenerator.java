@@ -8,6 +8,7 @@ import java.util.List;
 import java.sql.*;
 //import com.mysql.jdbc.Driver;
 import java.util.Scanner;
+import java.util.Random;
 
 
 
@@ -20,71 +21,226 @@ public class DataGenerator {
     static final String DB_URL="jdbc:mysql://35.192.17.149:3306/MasterDB";
     static final String USER="ryanbryce";
     static final String PASS="poop";
+    public static Integer userID = null;
+    public static String song = "";
+    public static String genre = "";
+    public static String artist = "";
+    public static String name="";
+    public static Integer length = null;
+    public static Integer timeListened = null;
+    public static String playlistName = "";
+    public static Integer IDNumber;
+    public static Boolean enteredRightInput=null;
+    public static Integer currentUserID=null;
 
-    public static void main (String[] args)
-    {
+    public static void main (String[] args) {
         Faker faker = new Faker();
-        String numOfTuples="";
-        Connection conn=null;
-        Statement stmt=null;
-        Scanner input=new Scanner(System.in);
-        Integer mainTableNumber=0;
-        Integer ID=0;
-        //for randomizing it down below it must be initalized
+        Connection conn = null;
+        Statement stmt = null;
+        Scanner input = new Scanner(System.in);
 
-        Integer userID=null;
-        String song="";
-        String genre="";
-        String artist="";
-        Integer length=null;
-        Integer timeListened=null;
-        String playlistName="";
-        String currentlyListeningTo="";
-        String followers[]=new String[50];
-        String following[]=new String[50];
-        String recentPlayedArtists[]=new String[50];
-        String publicPlaylists[]=new String[50];
-        FileWriter MainfileWriter=null;
-        // TODO: 5/7/2019
-        //reister jbdc driver
+        String currentlyListeningTo = "";
+        String followers[] = new String[50];
+        String following[] = new String[50];
+        String recentPlayedArtists[] = new String[50];
+        String publicPlaylists[] = new String[50];
+        FileWriter MainfileWriter = null;
+        enteredRightInput=false;
+
+
+
         try {
             System.out.println("Connecting to the database...");
-            conn=DriverManager.getConnection(DB_URL,USER,PASS);
-            System.out.println("Connected to database successfully\n\n\n");
-            System.out.println("       Type in the number for the option you want");
-            System.out.println("*********************************************************");
-            System.out.println("|            (1) Show all names in database             |");
-            System.out.println("|              (2) View all of your songs               |");
-            System.out.println("|           (3) View currently listening song           |");
-            System.out.println("|  (3) View the total time you've listened to each song |");
-            System.out.println("|                    (4) Account Info                   |");
-            System.out.println("|                  (5) View your stats                  |");
-            System.out.println("*********************************************************");
-            Scanner in=new Scanner(System.in);
-            int selection;
-            selection=in.nextInt();
-            switch (selection){
-                case 1:
-                    // TODO: 5/8/2019
-                    break;
-                case 2:
-                    // TODO: 5/8/2019
-                    break;
-                case 3:
-                    // TODO: 5/8/2019
-                    break;
-                case 4:
-                    // TODO: 5/8/2019
-                    break;
-                case 5:
-                    // TODO: 5/8/2019
-                    break;
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            System.out.println("Connected to database successfully\n\n");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        System.out.println("         Who are you?     ");
+        System.out.println("*******************************");
+        System.out.println("|      (1) Eugena Robel       |");
+        System.out.println("|     (2) Coleen Upton MD     |");
+        System.out.println("|   (3) Shirleen Shanahan IV  |");
+        System.out.println("*******************************");
+        while (enteredRightInput.equals(false)){
+            try{
+                Scanner myOBJ=new Scanner(System.in);
+                currentUserID=myOBJ.nextInt();
+                enteredRightInput=true;
             }
-            //theFileName=input.nextLine();
-            //System.out.println("How many tuples do you want");
-            numOfTuples=input.nextLine();
-            /*
+            catch (Exception InputMismatch)
+            {
+                System.out.println("Enter an Integer");
+
+            }
+        }
+
+        System.out.println("       Type in the number for the option you want");
+        System.out.println("*********************************************************");
+        System.out.println("|            (1) Show all names in database             |");
+        System.out.println("|              (2) View all of your songs               |");
+        System.out.println("|           (3) View currently listening song           |");
+        System.out.println("|  (4) View the total time you've listened to each song |");
+        System.out.println("|                    (5) Account Info                   |");
+        System.out.println("|                  (6) View your stats                  |");
+        System.out.println("*********************************************************");
+        Scanner in = new Scanner(System.in);
+        int selection;
+        selection = in.nextInt();
+        switch (selection) {
+            //show names
+            case 1:
+                try {
+                    showNames();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                break;
+             //show your songs
+            case 2:
+                showUserSongs();
+                break;
+            //current song
+            case 3:
+                currentlyListeningTo();
+                //populateAllSavedSongs();
+                break;
+            case 4:
+                // TODO: 5/8/2019
+                //fix hour minutes seconds
+                totalTimeEachSong();
+                break;
+            case 5:
+                populateAllSavedSongs();
+                // TODO: 5/8/2019
+                break;
+            case 6:
+                // TODO: 5/9/2019
+                break;
+        }
+        //theFileName=input.nextLine();
+        //System.out.println("How many tuples do you want");
+
+
+    }
+
+    public static void showNames() throws SQLException {
+        Statement stmt=null;
+        Connection conn=null;
+        ResultSet rs=null;
+        String selectTable="SELECT DISTINCT name FROM allSavedSongs;";
+        try {
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            stmt = conn.createStatement();
+            rs=stmt.executeQuery(selectTable);
+            while (rs.next()){
+                Object obj=rs.getObject("name");
+                System.out.println(obj);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        stmt.execute(selectTable);
+    }
+
+    public static void populateAllSavedSongs()
+    {
+        Statement stmt=null;
+        Connection con=null;
+        String insertTable="INSERT into allSavedSongs (userID, name,song,genre,artist,length,timeListened,playlist) values (?,?,?,?,?,?,?,?);";
+        Faker faker = new Faker();
+        Integer amount=0;
+        name=faker.name().fullName();
+        while(amount<45)
+        {
+            //System.out.println("worked");
+            userID=1;
+            genre=faker.music().genre();
+            length=(int)(300*Math.random());
+            timeListened=(int)(10000*Math.random());
+            playlistName=faker.hipster().word();
+            artist=faker.rockBand().name();
+            song=faker.space().meteorite();
+            try {
+                con=DriverManager.getConnection(DB_URL,USER,PASS);
+                stmt=con.createStatement();
+                PreparedStatement preparedStmt=con.prepareStatement(insertTable);
+                preparedStmt.setInt(1,3);
+                preparedStmt.setString(2,name);
+                preparedStmt.setString(3,song);
+                preparedStmt.setString(4,genre);
+                preparedStmt.setString(5,artist);
+                preparedStmt.setInt(6,length);
+                preparedStmt.setInt(7,timeListened);
+                preparedStmt.setString(8,playlistName);
+                preparedStmt.execute();
+                System.out.println("worked "+amount);
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            amount++;
+        }
+    }
+    public static void showUserSongs(){
+        Statement stmt=null;
+        Connection conn=null;
+        ResultSet rs=null;
+        String selectSongs="SELECT DISTINCT song FROM allSavedSongs WHERE userID="+currentUserID;
+        try {
+            conn=DriverManager.getConnection(DB_URL,USER,PASS);
             stmt=conn.createStatement();
+            rs=stmt.executeQuery(selectSongs);
+            while (rs.next()){
+                Object obj=rs.getObject("song");
+                System.out.println(obj);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public static void currentlyListeningTo(){
+        Statement stmt=null;
+        Connection conn=null;
+        ResultSet rs=null;
+        String selectCurrentSong="SELECT currentlyListeningTo FROM listeningTo WHERE userID="+currentUserID;
+        try {
+            conn=DriverManager.getConnection(DB_URL,USER,PASS);
+            stmt=conn.createStatement();
+            rs=stmt.executeQuery(selectCurrentSong);
+            while (rs.next()){
+                Object obj=rs.getObject("currentlyListeningTo");
+                System.out.println(obj);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void totalTimeEachSong(){
+        Statement stmt=null;
+        Connection conn=null;
+        ResultSet rs=null;
+        String selectLength="SELECT song,timeListened FROM allSavedSongs WHERE userID="+currentUserID;
+        try {
+            conn=DriverManager.getConnection(DB_URL,USER,PASS);
+            stmt=conn.createStatement();
+            rs=stmt.executeQuery(selectLength);
+            while (rs.next()){
+                Object song=rs.getObject("song");
+                Integer timeListened=rs.getInt("timeListened");
+                int seconds=timeListened%60;
+                int minutes=timeListened/60;
+                int hours=minutes%60;
+                hours=minutes/60;
+                System.out.println(song+"  *****  "+hours+" hours, "+minutes+" minutes, "+seconds+" seconds");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+            /*
 
 
             //Creating Main Table
@@ -125,9 +281,7 @@ public class DataGenerator {
 
             numTuplesInt=Integer.parseInt(numOfTuples);*/
 
-        }  catch (SQLException e) {
-            e.printStackTrace();
-        }
+
 
 /*
         while (mainTableNumber<numTuplesInt)
@@ -303,7 +457,7 @@ public class DataGenerator {
         } catch (SQLException e) {
             e.printStackTrace();
         } */
-    }
+
 
 
 
