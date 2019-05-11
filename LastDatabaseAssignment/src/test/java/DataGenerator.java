@@ -377,6 +377,23 @@ public class DataGenerator {
     }
 
     public static void displayTopSongsFromEveryone(){
+        System.out.println("Top  5 Songs ordered by total user time listened: ");
+        Statement stmt=null;
+        Connection conn=null;
+        ResultSet rs=null;
+        String selectLength="SELECT song FROM allUserStats ORDER BY totalUserTimeListened DESC LIMIT 5";
+        try {
+            conn=DriverManager.getConnection(DB_URL,USER,PASS);
+            stmt=conn.createStatement();
+            rs=stmt.executeQuery(selectLength);
+            while (rs.next()){
+                Object playlist=rs.getObject("song");
+                String playlistString=playlist.toString();
+                System.out.println(playlistString);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
     }
     public static void populateuserStats(){
