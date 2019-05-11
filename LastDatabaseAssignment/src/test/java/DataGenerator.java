@@ -6,9 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.sql.*;
-//import com.mysql.jdbc.Driver;
 import java.util.Scanner;
-import java.util.Random;
 
 
 
@@ -82,7 +80,6 @@ public class DataGenerator {
         System.out.println("|           (3) View currently listening song           |");
         System.out.println("|  (4) View the total time you've listened to each song |");
         System.out.println("|                    (5) Account Info                   |");
-        System.out.println("|                  (6) View your stats                  |");
         System.out.println("*********************************************************");
         Scanner in = new Scanner(System.in);
         int selection;
@@ -98,7 +95,10 @@ public class DataGenerator {
                 break;
              //show your songs
             case 2:
+                //populateuserStats();
                 showUserSongs();
+                //populatePublicPlaylists();
+                //populateRecentArtists();
                 break;
             //current song
             case 3:
@@ -106,21 +106,117 @@ public class DataGenerator {
                 //populateAllSavedSongs();
                 break;
             case 4:
-                // TODO: 5/8/2019
-                //fix hour minutes seconds
                 totalTimeEachSong();
                 break;
             case 5:
-                populateAllSavedSongs();
-                // TODO: 5/8/2019
+                //populateAllSavedSongs();
+                displayOptions();
                 break;
-            case 6:
-                // TODO: 5/9/2019
-                break;
+
         }
         //theFileName=input.nextLine();
         //System.out.println("How many tuples do you want");
 
+
+    }
+    public static void displayOptions(){
+
+
+        System.out.println("***********************");
+        System.out.println("(1) How many followers  you have");
+        System.out.println("(2) How many people you follow");
+        System.out.println("(3) Recently played artists");
+        System.out.println("(4) Your public playlists");
+        System.out.println("(5) See top songs from everyone");
+        System.out.println("(6) Add a song to your library");
+        System.out.println("(7) Remove a song from library");
+        Scanner in = new Scanner(System.in);
+        int selection;
+        selection = in.nextInt();
+        switch (selection){
+            case 1: howManyFollowers();
+                //populateRecentArtists();
+                 break;
+
+            case 2:howManyYouFollow(); break;
+
+            case 3:recentArtists(); break;
+
+            case 4:publicPlaylists(); break;
+
+            case 5:displayTopSongsFromEveryone(); break;
+
+            case 6:addSong(); break;
+
+            case 7:removeSong(); break;
+
+        }
+
+    }
+    public static void addSong(){
+        Faker faker=new Faker();
+        Statement stmt=null;
+        Connection conn=null;
+        ResultSet rs=null;
+        String insertIntoAllSavedSongs="INSERT INTO allSavedSongs(userID,name,song,genre,artist,length,timeListened,playlist) values(?,?,?,?,?,?,?,?);";
+        Scanner in=new Scanner(System.in);
+        Scanner in2=new Scanner(System.in);
+        Scanner in3=new Scanner(System.in);
+        String songName;
+        String artistName;
+        String genre;
+        String name=null;
+        int theLength=(int)(300*Math.random());
+        int theTimeListened=(int)(10000*Math.random());
+        String playlistName=faker.hipster().word();
+        System.out.println("What song would you like to add?");
+        songName=in.next();
+        System.out.println("What's the Artist's name?");
+        artistName=in2.next();
+        System.out.println("What's the genre?");
+        genre=in3.next();
+        if(currentUserID==1){
+            name="Eugena Robel";
+        }
+        if(currentUserID==2){
+            name="Coleen Upton MD";
+        }
+        if(currentUserID==3){
+            name="Shirleen Shanahan IV";
+        }
+        try {
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            stmt = conn.createStatement();
+            PreparedStatement preparedStmt=conn.prepareStatement(insertIntoAllSavedSongs);
+            preparedStmt.setInt(1,currentUserID);
+            preparedStmt.setString(2,name);
+            preparedStmt.setString(3,songName);
+            preparedStmt.setString(4,genre);
+            preparedStmt.setString(5,artistName);
+            preparedStmt.setInt(6,theLength);
+            preparedStmt.setInt(7,theTimeListened);
+            preparedStmt.setString(8,playlistName);
+            preparedStmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public static void removeSong(){
+        Faker faker=new Faker();
+        Statement stmt=null;
+        Connection conn=null;
+
+        Scanner in=new Scanner(System.in);
+        System.out.println("Which song would you like to remove?");
+        String songName=in.next();
+        String removeSongStmt="DELETE FROM allSavedSongs WHERE song=\""+songName+"\" AND userID=\""+currentUserID+"\";";
+        try {
+            conn=DriverManager.getConnection(DB_URL,USER,PASS);
+            PreparedStatement preparedStmt=conn.prepareStatement(removeSongStmt);
+            preparedStmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -144,45 +240,8 @@ public class DataGenerator {
         stmt.execute(selectTable);
     }
 
-    public static void populateAllSavedSongs()
-    {
-        Statement stmt=null;
-        Connection con=null;
-        String insertTable="INSERT into allSavedSongs (userID, name,song,genre,artist,length,timeListened,playlist) values (?,?,?,?,?,?,?,?);";
-        Faker faker = new Faker();
-        Integer amount=0;
-        name=faker.name().fullName();
-        while(amount<45)
-        {
-            //System.out.println("worked");
-            userID=1;
-            genre=faker.music().genre();
-            length=(int)(300*Math.random());
-            timeListened=(int)(10000*Math.random());
-            playlistName=faker.hipster().word();
-            artist=faker.rockBand().name();
-            song=faker.space().meteorite();
-            try {
-                con=DriverManager.getConnection(DB_URL,USER,PASS);
-                stmt=con.createStatement();
-                PreparedStatement preparedStmt=con.prepareStatement(insertTable);
-                preparedStmt.setInt(1,3);
-                preparedStmt.setString(2,name);
-                preparedStmt.setString(3,song);
-                preparedStmt.setString(4,genre);
-                preparedStmt.setString(5,artist);
-                preparedStmt.setInt(6,length);
-                preparedStmt.setInt(7,timeListened);
-                preparedStmt.setString(8,playlistName);
-                preparedStmt.execute();
-                System.out.println("worked "+amount);
 
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            amount++;
-        }
-    }
+
     public static void showUserSongs(){
         Statement stmt=null;
         Connection conn=null;
@@ -230,237 +289,218 @@ public class DataGenerator {
             while (rs.next()){
                 Object song=rs.getObject("song");
                 Integer timeListened=rs.getInt("timeListened");
-                int seconds=timeListened%60;
-                int minutes=timeListened/60;
-                int hours=minutes%60;
-                hours=minutes/60;
+                int hours=timeListened/3600;
+                int remainder=timeListened-hours*3600;
+                int minutes=remainder/60;
+                remainder=remainder-minutes*60;
+                int seconds=remainder;
                 System.out.println(song+"  *****  "+hours+" hours, "+minutes+" minutes, "+seconds+" seconds");
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-            /*
 
 
-            //Creating Main Table
-            String TableDropMain="DROP TABLE IF EXISTS MainInfoTable;";
-            String CreateMain="CREATE TABLE MainInfoTable (ID VARCHAR (25) PRIMARY KEY, FirstName VARCHAR(25),\n" +
-                    "                      LastName VARCHAR(25),CompanyName varchar (45),StreetAddress varchar(45),FavoriteBeer varchar (45));";
-            stmt.executeUpdate(TableDropMain);
-            stmt.executeUpdate(CreateMain);
+    public static void howManyFollowers(){
+        Statement stmt=null;
+        Connection conn=null;
+        ResultSet rs=null;
+        String selectLength="SELECT followers FROM userInfo WHERE userID="+currentUserID+";";
+        try {
+            conn=DriverManager.getConnection(DB_URL,USER,PASS);
+            stmt=conn.createStatement();
+            rs=stmt.executeQuery(selectLength);
+            while (rs.next()){
+                Object followers=rs.getObject("followers");
+                String followersStr=followers.toString();
+                System.out.println("You have: "+followersStr+" followers");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public static void howManyYouFollow(){
+        Statement stmt=null;
+        Connection conn=null;
+        ResultSet rs=null;
+        String selectLength="SELECT following FROM userInfo WHERE userID="+currentUserID+";";
+        try {
+            conn=DriverManager.getConnection(DB_URL,USER,PASS);
+            stmt=conn.createStatement();
+            rs=stmt.executeQuery(selectLength);
+            while (rs.next()){
+                Object followering=rs.getObject("following");
+                String followeingStr=followering.toString();
+                System.out.println("You are following "+followering+" people");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public static void recentArtists(){
+        Statement stmt=null;
+        Connection conn=null;
+        ResultSet rs=null;
+        String selectLength="SELECT recentPlayedArtist FROM recentArtists WHERE userID="+currentUserID+" LIMIT 10;";
+        try {
+            conn=DriverManager.getConnection(DB_URL,USER,PASS);
+            stmt=conn.createStatement();
+            rs=stmt.executeQuery(selectLength);
+            while (rs.next()){
+                Object artist=rs.getObject("recentPlayedArtist");
+                String artistStr=artist.toString();
+                System.out.println(artistStr);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
-            //Creating Simple Table
-            String simpleTableDrop="DROP TABLE IF EXISTS simpleTable;";
-            String CreateSimple="CREATE TABLE simpleTable (ID VARCHAR (20) PRIMARY KEY, FirstName VARCHAR(25),\n" +
-                    "                      LastName VARCHAR(25));";
-            stmt.executeUpdate(simpleTableDrop);
-            stmt.executeUpdate(CreateSimple);
+    }
+    public static void publicPlaylists(){
+        Statement stmt=null;
+        Connection conn=null;
+        ResultSet rs=null;
+        String selectLength="SELECT publicPlaylist FROM publicPlaylists WHERE userID="+currentUserID;
+        try {
+            conn=DriverManager.getConnection(DB_URL,USER,PASS);
+            stmt=conn.createStatement();
+            rs=stmt.executeQuery(selectLength);
+            while (rs.next()){
+                Object playlist=rs.getObject("publicPlaylist");
+                String playlistString=playlist.toString();
+                System.out.println(playlistString);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
-            //Creating Address table
-            String addressTableDrop="DROP TABLE IF EXISTS addressTable;";
-            String createAddressTable="CREATE TABLE addressTable (StreetAdress varchar (30), CityName VARCHAR(50),\n" +
-                    "                      Country VARCHAR(50));";
-            stmt.executeUpdate(addressTableDrop);
-            stmt.executeUpdate(createAddressTable);
+    public static void displayTopSongsFromEveryone(){
 
-            //Creating Company Table
-            String companyTableDrop="DROP TABLE IF EXISTS companyTable;";
-            String createCompanyTable="CREATE TABLE companyTable (CompanyName varchar (30),\n" +
-                    "                      Industry VARCHAR(50));";
-            stmt.executeUpdate(companyTableDrop);
-            stmt.executeUpdate(createCompanyTable);
-
-            //Creating Beer Table
-            String beerTableDrop="DROP TABLE IF EXISTS beerTable;";
-            String createBeerTable="CREATE TABLE beerTable (BeerName varchar (50), Hop VARCHAR(50),\n" +
-                    "                      Style VARCHAR(100));";
-            stmt.executeUpdate(beerTableDrop);
-            stmt.executeUpdate(createBeerTable);
-
-
-            numTuplesInt=Integer.parseInt(numOfTuples);*/
-
-
-
-/*
-        while (mainTableNumber<numTuplesInt)
+    }
+    public static void populateuserStats(){
+        Statement stmt=null;
+        Connection con=null;
+        String insertTable="INSERT into allUserStats (song, totalUserTimeListened,genre,artist) values (?,?,?,?);";
+        Faker faker = new Faker();
+        String songName="";
+        Integer totalTimeListened=null;
+        String theGenre="";
+        String theArtist="";
+        Integer amount=0;
+        while (amount<20){
+            songName=faker.space().meteorite();
+            totalTimeListened=(int)(25000*Math.random());
+            theGenre=faker.music().genre();
+            theArtist=faker.rockBand().name();
+            try {
+                con=DriverManager.getConnection(DB_URL,USER,PASS);
+                PreparedStatement preparedStmt=con.prepareStatement(insertTable);
+                preparedStmt.setString(1,songName);
+                preparedStmt.setInt(2,totalTimeListened);
+                preparedStmt.setString(3,theGenre);
+                preparedStmt.setString(4,theArtist);
+                preparedStmt.execute();
+                System.out.println("Worked"+amount);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            amount++;
+        }
+    }
+    public static void populateAllSavedSongs()
+    {
+        Statement stmt=null;
+        Connection con=null;
+        String insertTable="INSERT into allSavedSongs (userID, name,song,genre,artist,length,timeListened,playlist) values (?,?,?,?,?,?,?,?);";
+        Faker faker = new Faker();
+        Integer amount=0;
+        name=faker.name().fullName();
+        while(amount<45)
         {
-            //now printing all tuples to the csv
-            firstName=faker.name().firstName();
-            LastName=faker.name().lastName();
-            jobTitle=faker.job().title();
-            companyName=faker.company().name();
-            streetAddress = faker.address().streetAddress(); // 60018 Sawayn Brooks Suite 449
-            cityName=faker.address().cityName();
-            country=faker.address().country();
-            beerHop=faker.beer().hop();
-            beerStyle=faker.beer().style();
-            faveBeerName=faker.beer().name();
-            industryName=faker.company().industry();
-
-            //ID is set to zero up top and is now counting and printing to the csv
-            ID++;
-            String sID=ID.toString();
-            try{
-                MainfileWriter=new FileWriter(theFileName,true);
-                MainfileWriter.append(sID+",");
-                MainfileWriter.append(firstName+","+LastName+","+jobTitle+","+companyName+","+streetAddress+","+cityName+","+country+","+beerHop+","+beerStyle+","+faveBeerName+","+industryName+"\n");
-                MainfileWriter.close();
-
-            }
-            catch (Exception e)
-            {
-            }
-
-            mainTableNumber++;
-        }
-
-        //writing to simpleTable
-        try {
-            BufferedReader br=new BufferedReader(new FileReader(theFileName));
-            String line="";
-            String csvSplitBy=",";
-            while((line=br.readLine())!=null){
-                String [] data=line.split(csvSplitBy);
-                String studentIDS =data[0];
-                String thefirstName=data[1];
-                String lastName=data[2];
-                String insertIntoSimple="INSERT into simpleTable (ID, FirstName,LastName) values (?,?,?);";
-                PreparedStatement preparedStmt=conn.prepareStatement(insertIntoSimple);
-                preparedStmt.setString(1,studentIDS);
-                preparedStmt.setString(2,thefirstName);
-                preparedStmt.setString(3,lastName);
+            //System.out.println("worked");
+            userID=1;
+            genre=faker.music().genre();
+            length=(int)(300*Math.random());
+            timeListened=(int)(10000*Math.random());
+            playlistName=faker.hipster().word();
+            artist=faker.rockBand().name();
+            song=faker.space().meteorite();
+            try {
+                con=DriverManager.getConnection(DB_URL,USER,PASS);
+                stmt=con.createStatement();
+                PreparedStatement preparedStmt=con.prepareStatement(insertTable);
+                preparedStmt.setInt(1,3);
+                preparedStmt.setString(2,name);
+                preparedStmt.setString(3,song);
+                preparedStmt.setString(4,genre);
+                preparedStmt.setString(5,artist);
+                preparedStmt.setInt(6,length);
+                preparedStmt.setInt(7,timeListened);
+                preparedStmt.setString(8,playlistName);
                 preparedStmt.execute();
+                System.out.println("worked "+amount);
 
-
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
+            amount++;
         }
+    }
+    public static void populateRecentArtists()
+    {
+        String recentartist="";
+        Statement stmt=null;
+        Connection con=null;
+        String insertTable="INSERT into recentArtists (userID, recentPlayedArtist) values (?,?);";
+        Faker faker = new Faker();
+        Integer amount=0;
 
-        //writing mainTable
-        try {
-            BufferedReader br=new BufferedReader(new FileReader(theFileName));
-            String line="";
-            String csvSplitBy=",";
-            while((line=br.readLine())!=null){
-                String [] data=line.split(csvSplitBy);
-                String studentIDS =data[0];
-                String thefirstName=data[1];
-                String lastName=data[2];
-                String CompanyName=data[4];
-                String StreetAddress=data[5];
-                String favBeer=data[10];
-
-                String insertIntoMain="INSERT into MainInfoTable (ID, FirstName,LastName,CompanyName,StreetAddress,FavoriteBeer) values (?,?,?,?,?,?);";
-                PreparedStatement preparedStmt=conn.prepareStatement(insertIntoMain);
-                preparedStmt.setString(1,studentIDS);
-                preparedStmt.setString(2,thefirstName);
-                preparedStmt.setString(3,lastName);
-                preparedStmt.setString(4,CompanyName);
-                preparedStmt.setString(5,StreetAddress);
-                preparedStmt.setString(6,favBeer);
+        while(amount<30)
+        {
+            recentartist=faker.rockBand().name();
+            try {
+                con=DriverManager.getConnection(DB_URL,USER,PASS);
+                stmt=con.createStatement();
+                PreparedStatement preparedStmt=con.prepareStatement(insertTable);
+                preparedStmt.setInt(1,3);
+                preparedStmt.setString(2,recentartist);
                 preparedStmt.execute();
+                System.out.println("worked "+amount);
 
-
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
+            amount++;
         }
+    }
+    public static void populatePublicPlaylists(){
+        String recentPlaylist="";
+        Statement stmt=null;
+        Connection con=null;
+        String insertTable="INSERT into publicPlaylists (userID, publicPlaylist) values (?,?);";
+        Faker faker = new Faker();
+        Integer amount=0;
 
-
-        //writing to address table
-        try {
-            BufferedReader br=new BufferedReader(new FileReader(theFileName));
-            String line="";
-            String csvSplitBy=",";
-            while((line=br.readLine())!=null){
-                String [] data=line.split(csvSplitBy);
-                String TheStreetAddress=data[5];
-                String TheCityName=data[6];
-                String TheCountry=data[7];
-                String insertIntoAddressTable="INSERT into addressTable (StreetAdress,CityName,Country) values (?,?,?);";
-                PreparedStatement preparedStmt=conn.prepareStatement(insertIntoAddressTable);
-                preparedStmt.setString(1,TheStreetAddress);
-                preparedStmt.setString(2,TheCityName);
-                preparedStmt.setString(3,TheCountry);
-
+        while(amount<6)
+        {
+            recentPlaylist=faker.hipster().word();
+            try {
+                con=DriverManager.getConnection(DB_URL,USER,PASS);
+                stmt=con.createStatement();
+                PreparedStatement preparedStmt=con.prepareStatement(insertTable);
+                preparedStmt.setInt(1,3);
+                preparedStmt.setString(2,recentPlaylist);
                 preparedStmt.execute();
+                System.out.println("worked "+amount);
 
-
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
+            amount++;
         }
-
-        //writing to beer table
-        try {
-            BufferedReader br=new BufferedReader(new FileReader(theFileName));
-            String line="";
-            String csvSplitBy=",";
-            while((line=br.readLine())!=null){
-                String [] data=line.split(csvSplitBy);
-                String TheBeerName=data[10];
-                String TheHopName=data[9];
-                String TheStyleName=data[8];
-                String insertIntoAddressTable="INSERT into beerTable (BeerName,Hop,Style) values (?,?,?);";
-                PreparedStatement preparedStmt=conn.prepareStatement(insertIntoAddressTable);
-                preparedStmt.setString(1,TheBeerName);
-                preparedStmt.setString(2,TheHopName);
-                preparedStmt.setString(3,TheStyleName);
-                preparedStmt.execute();
-
-
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        //inserting into company table
-        try {
-            BufferedReader br=new BufferedReader(new FileReader(theFileName));
-            String line="";
-            String csvSplitBy=",";
-            while((line=br.readLine())!=null){
-                String [] data=line.split(csvSplitBy);
-                String TheCompanyNames=data[4];
-                String TheIndustryNames=data[11];
-                String insertIntoAddressTable="INSERT into companyTable (CompanyName,Industry) values (?,?);";
-                PreparedStatement preparedStmt=conn.prepareStatement(insertIntoAddressTable);
-                preparedStmt.setString(1,TheCompanyNames);
-                preparedStmt.setString(2,TheIndustryNames);
-                preparedStmt.execute();
-
-
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } */
-
-
-
-
+    }
 
 }
 
