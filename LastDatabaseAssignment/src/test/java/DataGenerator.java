@@ -95,8 +95,8 @@ public class DataGenerator {
                 break;
              //show your songs
             case 2:
-                //populateuserStats();
                 showUserSongs();
+                //populateuserStats();
                 //populatePublicPlaylists();
                 //populateRecentArtists();
                 break;
@@ -122,14 +122,15 @@ public class DataGenerator {
     public static void displayOptions(){
 
 
-        System.out.println("***********************");
-        System.out.println("(1) How many followers  you have");
-        System.out.println("(2) How many people you follow");
-        System.out.println("(3) Recently played artists");
-        System.out.println("(4) Your public playlists");
-        System.out.println("(5) See top songs from everyone");
-        System.out.println("(6) Add a song to your library");
-        System.out.println("(7) Remove a song from library");
+        System.out.println("|**********************************|");
+        System.out.println("| (1) How many followers  you have |");
+        System.out.println("|  (2) How many people you follow  |");
+        System.out.println("|   (3) Recently played artists    |");
+        System.out.println("|    (4) Your public playlists     |");
+        System.out.println("| (5) See top songs from everyone  |");
+        System.out.println("|  (6) Add a song to your library  |");
+        System.out.println("|  (7) Remove a song from library  |");
+        System.out.println("|**********************************|");
         Scanner in = new Scanner(System.in);
         int selection;
         selection = in.nextInt();
@@ -168,6 +169,7 @@ public class DataGenerator {
         String name=null;
         int theLength=(int)(300*Math.random());
         int theTimeListened=(int)(10000*Math.random());
+        //couldn't think on how to name playlist so used hipster name
         String playlistName=faker.hipster().word();
         System.out.println("What song would you like to add?");
         songName=in.next();
@@ -187,6 +189,7 @@ public class DataGenerator {
         try {
             conn = DriverManager.getConnection(DB_URL, USER, PASS);
             stmt = conn.createStatement();
+            //used prepare statement
             PreparedStatement preparedStmt=conn.prepareStatement(insertIntoAllSavedSongs);
             preparedStmt.setInt(1,currentUserID);
             preparedStmt.setString(2,name);
@@ -396,6 +399,8 @@ public class DataGenerator {
         }
 
     }
+
+    //all of the methods below were used to populate the database
     public static void populateuserStats(){
         Statement stmt=null;
         Connection con=null;
