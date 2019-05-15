@@ -12,9 +12,6 @@ import java.util.Scanner;
 
 public class MainFile {
 
-
-    // CSV file header
-    private static final Object[] FILE_HEADER = { "Empoyee Name","Empoyee Code", "In Time", "Out Time", "Duration", "Is Working Day" };
     static final String JBDC_DRIVER="com.mysql.jbdc.Driver";
     static final String DB_URL="jdbc:mysql://35.192.17.149:3306/MasterDB";
     static final String USER="ryanbryce";
@@ -127,6 +124,7 @@ public class MainFile {
         System.out.println("|  (6) Add a song to your library  |");
         System.out.println("|  (7) Remove a song from library  |");
         System.out.println("|        (8) Update a song         |");
+        System.out.println("|  (9) Export all songs and data   |");
         System.out.println("|**********************************|");
         Scanner in = new Scanner(System.in);
         int selection;
@@ -152,7 +150,9 @@ public class MainFile {
 
             case 7:addAndRemoveClass.removeSong(); break;
 
-            case 8:updateClass.main(null);
+            case 8:updateClass.main(null); break;
+
+            case 9: exportClass.main(null);
 
         }
 
